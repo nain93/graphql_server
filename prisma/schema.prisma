@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  userName  String     @default("null")
+  email     String     @unique
+  grade     String     @default("user")
+  password  String
+  Contents  Content[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  bookMarks BookMark[]
+}
+
+model Content {
+  id        Int        @id @default(autoincrement())
+  photos    Photo[]
+  bookMarks BookMark[]
+  comments  Comment[]
+  question  Question[]
+  views     Int        @default(0)
+  title     String
+  desc      String
+  type      String
+  User      User       @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  winCount  Int      @default(0)
+  photoUrl  String
+  photoName String
+  Content   Content  @relation(fields: [contentId], references: [id])
+  contentId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BookMark {
+  id        Int      @id @default(autoincrement())
+  User      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  Content   Content  @relation(fields: [contentId], references: [id])
+  contentId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contentId, userId])
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+
+  Content   Content  @relation(fields: [contentId], references: [id])
+  contentId Int
+  password  String
+  desc      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Question {
+  id           Int      @id @default(autoincrement())
+  winCount     Int      @default(0)
+  questionBody String
+  answer       Answer[]
+  Content      Content? @relation(fields: [contentId], references: [id])
+  contentId    Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Answer {
+
+  id         Int       @id @default(autoincrement())
+  winCount   Int       @default(0)
+  body       String
+  Question   Question? @relation(fields: [questionId], references: [id])
+  questionId Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
